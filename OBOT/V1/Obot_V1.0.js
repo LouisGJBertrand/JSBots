@@ -34,8 +34,9 @@ function dbug(value) {
 
 // Function by Geoffrey Crofte
 // on https://www.creativejuiz.fr/blog/javascript/recuperer-parametres-get-url-javascript
+// Adapted by Louis Bertrand
 //
-// Usage:   var $_GET = $_GET(),
+// Usage:   var $_GET = $_GET(<link>),
 //              name = $_GET['name'],
 //              age = $_GET['age'];
 function $_GET(link, param) {
