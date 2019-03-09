@@ -2,7 +2,7 @@
 /*
  *  Ogame Bot
  *  Name: Obot
- *  Version: 1.0
+ *  Version: 1.1
  *  Author: Louis Bertrand
  *  Email: adressepro111@pylott.yt
  *  website: pylott.yt
@@ -95,8 +95,8 @@ function getResourceAvailable() {
     var metal         = resourceTickerMetal["available"]
     var crystal       = resourceTickerCrystal["available"]
     var deuterium     = resourceTickerDeuterium["available"]
-    var darkmatter    = darkmatter
-    var energy        = energy
+    var darkmatter    = parseInt(document.querySelector("#resources_darkmatter").innerHTML.replace('.', ''))
+    var energy        = parseInt(document.querySelector("#resources_energy").innerHTML.replace('.', ''))
 
     var output = [metal, crystal, deuterium, energy, darkmatter]
     return output
@@ -135,13 +135,9 @@ function upgradeResourcesAction(whatToUpgrade, actualPage){
 
         } else {
 
-            dbug("You can't update this type of ressource")
-            dbug("We will wait a bit")
-
-            redirect = setInterval(() => {
-                window.location.href = UrlBase+"/game/index.php?page=resources&OBOTACTION=waiting"
-                clearInterval(redirect)
-            }, 10000);
+            dbug("You can't update this type of resource")
+            dbug("We will wait a bit ...")
+            pageRedirectorTimer(10000, "overview", "waiting")
 
         }
 
@@ -152,39 +148,59 @@ function upgradeResourcesAction(whatToUpgrade, actualPage){
 // Function by Louis Bertrand
 //
 // USAGE: upgradeResourcesDetermine((ARRAY) resources, actualPage)
-function upgradeResourcesDetermine(resources, actualPage) {
+function upgradeResourcesDetermine(resources, maxresource, actualPage) {
 
-    console.log(metal)
+    if(resources[0] == maxresource[0]){
+
+        console.log("updating metal container")
+        pageRedirector("station", "update", "OBotUpdate", "metal")
+
+    } else {
+        if(resources[1] == maxresource[1]){
+
+            console.log("updating crystal container")
+            pageRedirector("station", "update", "OBotUpdate", "crystal")
+
+        } else {
+            if(resources[2] == maxresource[2]){
+
+                console.log("updating deuterium container")
+                pageRedirector("station", "update", "OBotUpdate", "deuterium")
+
+            }
+        }
+    }
 
     if (resources[3] <= 10) {
 
-        upgradeResourcesAction(3, actualPage)
+        pageRedirector("resources", "update", "OBotUpdate", "energy")
 
     } else {
 
-        if (Math.min(resources[0], resources[1], resources[2]) == metal) {
+        if (Math.min(resources[0], resources[1], resources[2]) == resources[0]) {
 
             console.log("updating metal")
-            upgradeResourcesAction(0, actualPage)
+            pageRedirector("resources", "update", "OBotUpdate", "metal")
 
         } else {
 
-            if (Math.min(resources[0], resources[1], resources[2]) == crystal) {
+            if (Math.min(resources[0], resources[1], resources[2]) == resources[1]) {
     
                 console.log("updating crystal")
-                upgradeResourcesAction(1, actualPage)
+                pageRedirector("resources", "update", "OBotUpdate", "crystal")
+
     
             } else {
 
-                if (Math.min(resources[0], resources[1], resources[2]) == deuterium) {
+                if (Math.min(resources[0], resources[1], resources[2]) == resources[2]) {
     
                     console.log("updating deuterium")
-                    upgradeResourcesAction(2, actualPage)
+                    pageRedirector("resources", "update", "OBotUpdate", "deuterium")
 
                 } else {
 
                     console.log("updating energy")
-                    upgradeResourcesAction(3, actualPage)
+                    pageRedirector("resources", "update", "OBotUpdate", "energy")
 
                 }
     
@@ -195,49 +211,193 @@ function upgradeResourcesDetermine(resources, actualPage) {
 
 }
 
-var $_GETvalues = $_GET();
-actualPage = $_GETvalues["page"]
-actualAction = $_GETvalues["OBOTACTION"]
+// Function By Louis Bertrand
+//
+// Usage: previousLinkAnalyser()
+function previousLinkAnalyser() {
 
-console.log("Actual Page: "+actualPage)
+    if (document.referrer.includes(UrlBase)) {
 
-// Resource Acquisition
-AvailableResources = getResourceAvailable()
-ResourcesLimit = getResourceLimit()
+        if (document.referrer.includes("OBotAction")) {
 
-metal = AvailableResources[0]
-crystal = AvailableResources[1]
-deuterium = AvailableResources[2]
-energy = AvailableResources[3]
-darkmatter = AvailableResources[4]
+            var $_previousget = $_GET(document.referrer)
+            return $_previousget
 
-metalLimit = ResourcesLimit[0]
-crystalLimit = ResourcesLimit[1]
-deuteriumLimit = ResourcesLimit[2]
-// End of Resource Acquisition
+        } else {
 
+            return { "noAction" : true }
 
-console.log("metal resources: "+metal)
-console.log("max metal: "+metalLimit)
-console.log("crystal resources: "+crystal)
-console.log("crystal metal: "+crystalLimit)
-console.log("deuterium resources: "+deuterium)
-console.log("deuterium metal: "+deuteriumLimit)
-console.log("darkmatter resources: "+darkmatter)
-console.log("energy resources: "+energy)
+        }
 
+    } else {
 
+        return { "noAction" : true }
 
-// How to redirect:
+    }
 
-// redirect = setInterval(() => {
-//     window.location.href = UrlBase+"/game/index.php?page=resources&OBotAction=updating"
-//     clearInterval(redirect)
-// }, 1000);
-
-// OBOT Url encoding:
-// <UrlBase>/game/index.php?page=<page>&OBotAction=<action>+params
-
-function actionDecider(actualPage, AvailableResources, ResourcesLimit) {
-    
 }
+
+
+// Function by Louis Bertrand
+//
+// USAGE: pageRedirector(pageTo, action, paramKey, paramValue)
+function pageRedirector(pageTo, action, paramKey, paramValue){
+
+    if (typeof paramKey != "undefined") {
+        params = "&"+paramKey+"="+paramValue
+    } else {
+        params = ""
+    }
+
+    url = UrlBase+"/game/index.php?page="+pageTo+"&OBotAction="+action+params
+    redirect = setInterval(() => {
+        window.location.href = url
+        clearInterval(redirect)
+    }, 1000);
+
+}
+
+// Function by Louis Bertrand
+//
+// USAGE: pageRedirector(pageTo, action, paramKey, paramValue)
+function pageRedirectorTimer(timer, pageTo, action, paramKey, paramValue){
+
+    if (typeof paramKey != "undefined") {
+        params = "&"+paramKey+"="+paramValue
+    } else {
+        params = ""
+    }
+
+    url = UrlBase+"/game/index.php?page="+pageTo+"&OBotAction="+action+params
+    redirect = setInterval(() => {
+        window.location.href = url
+        clearInterval(redirect)
+    }, timer);
+
+}
+
+
+// Function by Louis Bertrand
+//
+// USAGE: actionDecider(actualPage, actualAction, AvailableResources, ResourcesLimit)
+function actionDecider(actualPage, actualAction, AvailableResources, ResourcesLimit) {
+
+    var previousLink = previousLinkAnalyser()
+
+    if(previousLink["noAction"] == true){
+
+        pageRedirector("overview", "waiting")
+
+    } else {
+
+        if (actualAction == "none" || typeof actualAction == "undefined") {
+
+            // redirect to the correct action
+            if(previousLink["OBotAction"] == "update"){
+
+                pageRedirector(actualPage, "updating")
+
+            } else {
+
+                if(previousLink["OBotAction"] == "updating"){
+
+                    pageRedirector(actualPage, "waiting")
+
+                } else {
+
+                        pageRedirector("overview", "waiting")
+
+                }
+
+            }
+
+        } else {
+
+            console.log("action executor on ...")
+            // execute the action
+            if (actualAction == "waiting") {
+
+                if (actualPage != "overview") {
+
+                    console.log("redirecting")
+                    pageRedirector("overview", "waiting")
+
+                } else {
+
+                    console.log("starting updation")
+                    upgradeResourcesDetermine(AvailableResources, ResourcesLimit, actualPage)
+
+                }
+
+            } else {
+
+                if (actualAction == "update") {
+
+                    updations = { "metal" : 0 , "crystal" : 1, "deuterium" : 2, "energy" : 3}
+
+                    var $_GETvalues = $_GET();
+                    var toUpdate = $_GETvalues["OBotUpdate"]
+                    upgradeResourcesAction(updations[toUpdate], actualPage)
+
+                }
+
+            }
+
+
+        }
+
+    }
+
+}
+
+globalTimer = setTimeout(() => {
+
+    var $_GETvalues = $_GET();
+    actualPage = $_GETvalues["page"]
+    actualAction = $_GETvalues["OBotAction"]
+
+    if (typeof actualAction == undefined) {
+        actualAction = "none"
+    }
+
+    console.log("Actual Page: "+actualPage)
+
+    // Resource Acquisition
+    AvailableResources = getResourceAvailable()
+    ResourcesLimit = getResourceLimit()
+
+    metal = AvailableResources[0]
+    crystal = AvailableResources[1]
+    deuterium = AvailableResources[2]
+    energy = AvailableResources[3]
+    darkmatter = AvailableResources[4]
+
+    metalLimit = ResourcesLimit[0]
+    crystalLimit = ResourcesLimit[1]
+    deuteriumLimit = ResourcesLimit[2]
+    // End of Resource Acquisition
+
+
+    console.log("metal resources: "+metal)
+    console.log("max metal: "+metalLimit)
+    console.log("crystal resources: "+crystal)
+    console.log("crystal metal: "+crystalLimit)
+    console.log("deuterium resources: "+deuterium)
+    console.log("deuterium metal: "+deuteriumLimit)
+    console.log("darkmatter resources: "+darkmatter)
+    console.log("energy resources: "+energy)
+
+    // How to redirect:
+
+    // redirect = setInterval(() => {
+    //     window.location.href = UrlBase+"/game/index.php?page=resources&OBotAction=updating"
+    //     clearInterval(redirect)
+    // }, 1000);
+
+    // OBOT Url encoding:
+    // <UrlBase>/game/index.php?page=<page>&OBotAction=<action>+params
+
+    actionDecider(actualPage, actualAction, AvailableResources, ResourcesLimit)
+
+}, 1000)
+
