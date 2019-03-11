@@ -117,9 +117,9 @@ function getResourceLimit() {
 
 }
 
-function upgradeResourcesAction(whatToUpgrade, actualPage){
+function upgradeResourcesAction(whatToUpgrade, actualPage, actualAction){
 
-    if (actualPage != "resources") {
+    if (actualPage != "resources" && actualAction != "updating") {
 
         window.location = UrlBase+"/game/index.php?page=resources"
 
@@ -337,7 +337,7 @@ function actionDecider(actualPage, actualAction, AvailableResources, ResourcesLi
 
                     var $_GETvalues = $_GET();
                     var toUpdate = $_GETvalues["OBotUpdate"]
-                    upgradeResourcesAction(updations[toUpdate], actualPage)
+                    upgradeResourcesAction(updations[toUpdate], actualPage, actualAction)
 
                 }
 
