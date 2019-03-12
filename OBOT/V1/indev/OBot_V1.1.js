@@ -410,4 +410,3 @@ globalTimer = setTimeout(() => {
     actionDecider(actualPage, actualAction, AvailableResources, ResourcesLimit)
 
 }, 1000)
-
