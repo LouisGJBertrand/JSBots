@@ -317,15 +317,25 @@ function actionDecider(actualPage, actualAction, AvailableResources, ResourcesLi
             // execute the action
             if (actualAction == "waiting") {
 
-                if (actualPage != "overview") {
+                if (actualPage != "overview" && actualAction != "updating") {
 
                     console.log("redirecting")
                     pageRedirector("overview", "waiting")
 
                 } else {
 
-                    console.log("starting updation")
-                    upgradeResourcesDetermine(AvailableResources, ResourcesLimit, actualPage)
+                    if (actualAction == "updating") {
+
+                        setTimeout(() => {
+                            pageRedirector("overview", "waiting")
+                        }, 100000)
+
+                    } else {
+
+                        console.log("starting updation")
+                        upgradeResourcesDetermine(AvailableResources, ResourcesLimit, actualPage)
+
+                    }
 
                 }
 
